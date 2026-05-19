@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GoalFlow – In-House Goal Setting & Tracking Portal</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2435;--bg4:#242b3d;
+  --border:#2a3148;--border2:#3a4460;
+  --text:#e8eaf0;--text2:#9ba3b8;--text3:#5f6880;
+  --accent:#4f7bff;--accent2:#3a62e8;--accent-glow:rgba(79,123,255,.18);
+  --green:#22c55e;--green-bg:rgba(34,197,94,.12);
+  --amber:#f59e0b;--amber-bg:rgba(245,158,11,.12);
+  --red:#ef4444;--red-bg:rgba(239,68,68,.12);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,.12);
+  --teal:#2dd4bf;--teal-bg:rgba(45,212,191,.12);
+  --radius:10px;--radius-lg:16px;--radius-xl:22px;
+  --shadow:0 2px 16px rgba(0,0,0,.5);
+  --font:'DM Sans',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.6}
+button{font-family:var(--font);cursor:pointer;border:none;outline:none}
+input,textarea,select{font-family:var(--font);background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:10px 14px;font-size:14px;width:100%;outline:none;transition:border .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:80px}
+label{font-size:13px;color:var(--text2);margin-bottom:4px;display:block}
+h1{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:400}
+h2{font-size:1.25rem;font-weight:600}
+h3{font-size:1rem;font-weight:600}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s}
+.main{margin-left:240px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:64px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:16px;position:sticky;top:0;z-index:50}
+.content{flex:1;padding:32px;max-width:1200px;width:100%}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.logo-text{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;display:inline-block}
+.sidebar-section{padding:12px 12px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:2px 8px;border-radius:var(--radius);color:var(--text2);transition:all .15s;cursor:pointer;font-size:14px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent);font-weight:500}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-user{margin-top:auto;padding:16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px}
+.card-sm{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px}
+.stat-num{font-size:2rem;font-weight:600;line-height:1.1;margin-top:4px}
+.stat-label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+.btn{padding:9px 18px;border-radius:var(--radius);font-size:14px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.btn-sm{padding:6px 12px;font-size:13px}
+.btn-xs{padding:4px 10px;font-size:12px;border-radius:6px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-draft{background:var(--bg4);color:var(--text2)}
+.badge-active{background:var(--teal-bg);color:var(--teal)}
+.badge-review{background:var(--amber-bg);color:var(--amber)}
+.badge-completed{background:var(--green-bg);color:var(--green)}
+.badge-archived{background:var(--bg4);color:var(--text3)}
+.badge-high{background:var(--red-bg);color:var(--red)}
+.badge-medium{background:var(--amber-bg);color:var(--amber)}
+.badge-low{background:var(--green-bg);color:var(--green)}
+.badge-role{background:var(--purple-bg);color:var(--purple)}
+.badge-accent{background:var(--accent-glow);color:var(--accent)}
+.progress-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.table{width:100%;border-collapse:collapse}
+.table th{padding:10px 16px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg3)}
+.table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.table tr:hover td{background:rgba(255,255,255,.02)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:32px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.form-grid{display:grid;gap:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.goal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:border-color .2s,transform .15s;cursor:pointer}
+.goal-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.goal-title{font-weight:600;font-size:15px;margin-bottom:4px;color:var(--text)}
+.goal-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.goal-progress-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.progress-pct{font-size:13px;font-weight:600;color:var(--accent);min-width:36px}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);background-image:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(79,123,255,.08),transparent)}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:48px 40px;width:100%;max-width:420px;box-shadow:var(--shadow)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}.gap-20{gap:20px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-24{margin-bottom:24px}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
+.text-muted{color:var(--text2)}.text-sm{font-size:13px}.text-xs{font-size:12px}
+.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-right{text-align:right}
+.w-full{width:100%}.divider{height:1px;background:var(--border);margin:16px 0}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+.tabs{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:var(--radius);margin-bottom:24px;width:fit-content}
+.tab{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border:none;background:transparent}
+.tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:12px;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
+.comment-bubble{background:var(--bg3);border-radius:var(--radius);padding:12px 14px;font-size:13px}
+.page-header{margin-bottom:32px}
+.page-header h2{font-size:1.5rem;font-weight:600;margin-bottom:4px}
+.breadcrumb{font-size:12px;color:var(--text3)}
+.input-error{border-color:var(--red)!important}
+.error-msg{color:var(--red);font-size:12px;margin-top:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{animation:spin .8s linear infinite;display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .2s ease}
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .grid-4{grid-template-columns:1fr 1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .form-row{grid-template-columns:1fr}
+  #menu-btn{display:flex!important}
+}
+@media(max-width:600px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .content{padding:16px}
+  .topbar{padding:0 16px}
+  .modal{padding:20px}
+  .login-card{padding:32px 24px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useReducer, createContext, useContext, useRef, useCallback } = React;
+
+// ─── API CONFIG ──────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:5000/api';  // ← change to your deployed backend URL
+
+// ─── API HELPER ──────────────────────────────────────────────────────────────
+async function api(path, options = {}, dispatchFn = null) {
+  const token = localStorage.getItem('gf_token');
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem('gf_token');
+    if (dispatchFn) dispatchFn({ type: 'LOGOUT' });
+    return null;
+  }
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const AppContext = createContext();
+
+function appReducer(state, action) {
+  switch (action.type) {
+    case 'SET_LOADING':   return { ...state, loading: action.loading };
+    case 'LOGIN':         return { ...state, currentUser: action.user, loading: false };
+    case 'LOGOUT':        return { ...state, currentUser: null, goals: [], users: [], orgObjectives: [], currentPage: 'dashboard' };
+    case 'SET_GOALS':     return { ...state, goals: action.goals };
+    case 'ADD_GOAL':      return { ...state, goals: [action.goal, ...state.goals] };
+    case 'UPDATE_GOAL':   return { ...state, goals: state.goals.map(g => g.id === action.goal.id ? action.goal : g) };
+    case 'DELETE_GOAL':   return { ...state, goals: state.goals.filter(g => g.id !== action.id) };
+    case 'SET_USERS':     return { ...state, users: action.users };
+    case 'ADD_USER':      return { ...state, users: [...state.users, action.user] };
+    case 'UPDATE_USER':   return { ...state, users: state.users.map(u => u.id === action.user.id ? action.user : u) };
+    case 'DELETE_USER':   return { ...state, users: state.users.filter(u => u.id !== action.id) };
+    case 'SET_OBJECTIVES':return { ...state, orgObjectives: action.objectives };
+    case 'ADD_OBJECTIVE': return { ...state, orgObjectives: [...state.orgObjectives, action.objective] };
+    case 'SET_AUDIT':     return { ...state, auditLog: action.log };
+    case 'SET_PAGE':      return { ...state, currentPage: action.page };
+    case 'SET_TOAST':     return { ...state, toast: action.toast };
+    default:              return state;
+  }
+}
+
+function AppProvider({ children }) {
+  const [state, dispatch] = useReducer(appReducer, {
+    currentUser: null,
+    goals: [],
+    users: [],
+    orgObjectives: [],
+    auditLog: [],
+    currentPage: 'dashboard',
+    toast: null,
+    loading: true,
+  });
+
+  const showToast = useCallback((msg, type = 'success') => {
+    dispatch({ type: 'SET_TOAST', toast: { msg, type } });
+    setTimeout(() => dispatch({ type: 'SET_TOAST', toast: null }), 3500);
+  }, []);
+
+  // ── Bootstrap: restore session on page load ─────────────────────────────────
+  useEffect(() => {
+    const token = localStorage.getItem('gf_token');
+    if (!token) { dispatch({ type: 'SET_LOADING', loading: false }); return; }
+
+    api('/auth/me', {}, dispatch)
+      .then(user => {
+        if (user) dispatch({ type: 'LOGIN', user });
+        else dispatch({ type: 'SET_LOADING', loading: false });
+      })
+      .catch(() => dispatch({ type: 'SET_LOADING', loading: false }));
+  }, []);
+
+  return (
+    <AppContext.Provider value={{ state, dispatch, showToast, api: (path, opts) => api(path, opts, dispatch) }}>
+      {children}
+    </AppContext.Provider>
+  );
+}
+
+function useApp() { return useContext(AppContext); }
+
+// ─── DATA LOADER — loads goals/users/objectives after login ──────────────────
+function useData() {
+  const { state, dispatch, api: call } = useApp();
+
+  useEffect(() => {
+    if (!state.currentUser) return;
+
+    const loadAll = async () => {
+      try {
+        const [goals, objectives] = await Promise.all([
+          call('/goals'),
+          call('/objectives'),
+        ]);
+        if (goals)      dispatch({ type: 'SET_GOALS',      goals });
+        if (objectives) dispatch({ type: 'SET_OBJECTIVES', objectives });
+
+        // Only managers/admin need full user list
+        if (state.currentUser.role !== 'employee') {
+          const users = await call('/users');
+          if (users) dispatch({ type: 'SET_USERS', users });
+        }
+      } catch (e) {
+        console.error('Data load error:', e);
+      }
+    };
+
+    loadAll();
+  }, [state.currentUser?.id]);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const STATUS_META = {
+  draft:     { label: 'Draft',      cls: 'badge-draft'    },
+  active:    { label: 'Active',     cls: 'badge-active'   },
+  review:    { label: 'In Review',  cls: 'badge-review'   },
+  completed: { label: 'Completed',  cls: 'badge-completed'},
+  archived:  { label: 'Archived',   cls: 'badge-archived' },
+};
+const PRIORITY_META = { high: { cls: 'badge-high' }, medium: { cls: 'badge-medium' }, low: { cls: 'badge-low' } };
+const progressColor = p => p >= 80 ? '#22c55e' : p >= 50 ? '#f59e0b' : '#ef4444';
+const today = () => new Date().toISOString().split('T')[0];
+const formatDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+
+function Avatar({ user, size = 36 }) {
+  if (!user) return null;
+  return <div className="avatar" style={{ width: size, height: size, background: (user.color || '#4f7bff') + '30', color: user.color || '#4f7bff', fontSize: size * .36 }}>{user.avatar || (user.name || '?').slice(0,2).toUpperCase()}</div>;
+}
+function Badge({ cls, children }) {
+  return <span className={`badge ${cls}`}>{children}</span>;
+}
+function ProgressBar({ value, color }) {
+  return <div className="progress-track"><div className="progress-fill" style={{ width: value + '%', background: color || progressColor(value) }}/></div>;
+}
+
+// ─── ICONS ───────────────────────────────────────────────────────────────────
+const Icon = {
+  dashboard:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+  goals:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>,
+  checkins:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>,
+  team:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="19" cy="7" r="2"/><path d="M23 21v-1a3 3 0 00-3-3"/></svg>,
+  analytics:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  admin:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>,
+  plus:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  edit:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  trash:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>,
+  close:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  logout:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  bell:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>,
+  menu:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  users:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+  objective:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  eye:        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+  eyeOff:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
+};
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function Toast() {
+  const { state } = useApp();
+  if (!state.toast) return null;
+  const colors = { success: '#22c55e', error: '#ef4444', info: '#4f7bff' };
+  return (
+    <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius-lg)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 8px 32px rgba(0,0,0,.5)', minWidth: 240, borderLeft: `3px solid ${colors[state.toast.type || 'success']}` }}>
+      <span style={{ color: colors[state.toast.type || 'success'], fontSize: 18 }}>{state.toast.type === 'error' ? '✗' : '✓'}</span>
+      <span style={{ fontSize: 14 }}>{state.toast.msg}</span>
+    </div>
+  );
+}
+
+// ─── LOGIN ───────────────────────────────────────────────────────────────────
+function Login() {
+  const { dispatch, showToast } = useApp();
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw]     = useState(false);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+
+  const handleLogin = async (e) => {
+    e && e.preventDefault();
+    setError('');
+    if (!email.trim() || !password) { setError('Email and password are required'); return; }
+    setLoading(true);
+    try {
+      const data = await api('/auth/login', { method: 'POST', body: { email: email.trim(), password } });
+      if (!data) { setError('Invalid credentials'); setLoading(false); return; }
+      localStorage.setItem('gf_token', data.token);
+      dispatch({ type: 'LOGIN', user: data.user });
+    } catch (err) {
+      setError(err.message || 'Login failed');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-wrap">
+      <div className="login-card fade-in">
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--accent-glow)', border: '1px solid rgba(79,123,255,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>🎯</div>
+          <h1 style={{ fontSize: '1.6rem', marginBottom: 6 }}>GoalFlow</h1>
+          <p className="text-muted text-sm">In-House Goal Setting & Tracking Portal</p>
+        </div>
+
+        <div className="form-grid">
+          <div>
+            <label>Email address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              placeholder="you@corp.com"
+              className={error && !email ? 'input-error' : ''}
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <label>Password</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPw ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                placeholder="Enter your password"
+                style={{ paddingRight: 44 }}
+                autoComplete="current-password"
+              />
+              <button onClick={() => setShowPw(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', color: 'var(--text3)', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">{showPw ? <><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></> : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>}</svg>
+              </button>
+            </div>
+          </div>
+          {error && <div className="error-msg" style={{ marginTop: -8 }}>{error}</div>}
+        </div>
+
+        <button className="btn btn-primary w-full" style={{ justifyContent: 'center', padding: '12px', marginTop: 20 }} onClick={handleLogin} disabled={loading}>
+          {loading ? <><span className="spinner"/>&nbsp;Signing in…</> : 'Sign In'}
+        </button>
+
+        <div style={{ marginTop: 20, padding: '14px', background: 'var(--bg3)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.06em' }}>Demo credentials</div>
+          {[
+            ['aanya@corp.com', 'Employee@123', 'Employee'],
+            ['priya@corp.com', 'Manager@123',  'Manager'],
+            ['sunita@corp.com','Admin@123',    'Admin'],
+          ].map(([e, p, r]) => (
+            <div key={e} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, cursor: 'pointer' }} onClick={() => { setEmail(e); setPassword(p); }}>
+              <span style={{ fontSize: 12, color: 'var(--text2)' }}>{e}</span>
+              <Badge cls={r === 'Admin' ? 'badge-high' : r === 'Manager' ? 'badge-review' : 'badge-accent'}>{r}</Badge>
+            </div>
+          ))}
+          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 8 }}>Click a row to auto-fill credentials</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── GOAL FORM MODAL ─────────────────────────────────────────────────────────
+function GoalModal({ onClose, existing, defaultOwnerId }) {
+  const { state, dispatch, showToast, api: call } = useApp();
+  const { currentUser, orgObjectives } = state;
+  const [form, setForm] = useState(existing ? {
+    title: existing.title, description: existing.description, priority: existing.priority,
+    category: existing.category, due_date: existing.due_date, org_objective_id: existing.org_objective_id,
+    quarter: existing.quarter, status: existing.status, progress: existing.progress,
+  } : {
+    title: '', description: '', priority: 'medium', category: '', due_date: '',
+    org_objective_id: '', quarter: 'Q3 2025', status: 'draft', progress: 0,
+  });
+  const [loading, setLoading] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const save = async () => {
+    if (!form.title.trim()) { showToast('Goal title is required', 'error'); return; }
+    setLoading(true);
+    try {
+      if (existing) {
+        const updated = await call(`/goals/${existing.id}`, { method: 'PATCH', body: form });
+        if (updated) { dispatch({ type: 'UPDATE_GOAL', goal: { ...existing, ...updated } }); showToast('Goal updated'); }
+      } else {
+        const created = await call('/goals', { method: 'POST', body: form });
+        if (created) { dispatch({ type: 'ADD_GOAL', goal: { ...created, comments: [], checkins: [] } }); showToast('Goal created!'); }
+      }
+      onClose();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <h3>{existing ? 'Edit Goal' : 'Create New Goal'}</h3>
+          <button className="btn btn-ghost btn-sm" onClick={onClose} style={{ padding: 6 }}>{Icon.close}</button>
+        </div>
+        <div className="form-grid">
+          <div><label>Goal Title *</label><input value={form.title} onChange={e => set('title', e.target.value)} placeholder="What do you want to achieve?"/></div>
+          <div><label>Description</label><textarea value={form.description} onChange={e => set('description', e.target.value)} placeholder="Describe the goal…" style={{ minHeight: 72 }}/></div>
+          <div className="form-row">
+            <div><label>Priority</label><select value={form.priority} onChange={e => set('priority', e.target.value)}><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+            <div><label>Category</label><input value={form.category} onChange={e => set('category', e.target.value)} placeholder="Technical, Learning…"/></div>
+          </div>
+          <div className="form-row">
+            <div><label>Quarter</label><select value={form.quarter} onChange={e => set('quarter', e.target.value)}>{['Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026'].map(q => <option key={q}>{q}</option>)}</select></div>
+            <div><label>Due Date</label><input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)}/></div>
+          </div>
+          <div>
+            <label>Linked Org Objective</label>
+            <select value={form.org_objective_id} onChange={e => set('org_objective_id', e.target.value)}>
+              <option value="">None</option>
+              {orgObjectives.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
+            </select>
+          </div>
+          {existing && (
+            <div className="form-row">
+              <div><label>Status</label><select value={form.status} onChange={e => set('status', e.target.value)}>{Object.entries(STATUS_META).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+              <div><label>Progress (%)</label><input type="number" min="0" max="100" value={form.progress} onChange={e => set('progress', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}/></div>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={save} disabled={loading}>{loading ? <span className="spinner"/> : (existing ? 'Save Changes' : 'Create Goal')}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── CHECKIN MODAL ────────────────────────────────────────────────────────────
+function CheckinModal({ goal, onClose }) {
+  const { dispatch, showToast, api: call } = useApp();
+  const [form, setForm] = useState({ progress: goal.progress, note: '', mood: 'on-track' });
+  const [loading, setLoading] = useState(false);
+
+  const save = async () => {
+    if (!form.note.trim()) { showToast('Please add a note', 'error'); return; }
+    setLoading(true);
+    try {
+      const checkin = await call('/checkins', { method: 'POST', body: { goal_id: goal.id, progress: parseInt(form.progress), note: form.note, mood: form.mood, date: today() } });
+      if (checkin) {
+        const updated = { ...goal, progress: parseInt(form.progress), checkins: [...(goal.checkins || []), checkin] };
+        if (parseInt(form.progress) >= 100) updated.status = 'review';
+        dispatch({ type: 'UPDATE_GOAL', goal: updated });
+        showToast('Check-in submitted!');
+        onClose();
+      }
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: 440 }}>
+        <div className="modal-header"><h3>Quarterly Check-in</h3><button className="btn btn-ghost btn-sm" onClick={onClose} style={{ padding: 6 }}>{Icon.close}</button></div>
+        <div className="card-sm mb-16" style={{ background: 'var(--bg3)' }}>
+          <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 4 }}>Goal</div>
+          <div style={{ fontWeight: 600, fontSize: 15 }}>{goal.title}</div>
+        </div>
+        <div className="form-grid">
+          <div>
+            <label>Current Progress ({form.progress}%)</label>
+            <input type="range" min="0" max="100" value={form.progress} onChange={e => setForm(f => ({ ...f, progress: e.target.value }))} style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}/>
+            <div style={{ marginTop: 6 }}><ProgressBar value={form.progress}/></div>
+          </div>
+          <div><label>Status this period</label><select value={form.mood} onChange={e => setForm(f => ({ ...f, mood: e.target.value }))}><option value="on-track">On Track</option><option value="at-risk">At Risk</option><option value="blocked">Blocked</option><option value="ahead">Ahead of Schedule</option></select></div>
+          <div><label>Update Note *</label><textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="What progress was made? Any blockers?" style={{ minHeight: 90 }}/></div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={save} disabled={loading}>{loading ? <span className="spinner"/> : 'Submit Check-in'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── GOAL DETAIL ─────────────────────────────────────────────────────────────
+function GoalDetail({ goal, onClose }) {
+  const { state, dispatch, showToast, api: call } = useApp();
+  const { currentUser, users, orgObjectives } = state;
+  const [comment, setComment] = useState('');
+  const [showCheckin, setShowCheckin] = useState(false);
+  const [showEdit, setShowEdit]       = useState(false);
+
+  const owner     = users.find(u => u.id === goal.owner_id) || (currentUser.id === goal.owner_id ? currentUser : null);
+  const linkedObj = orgObjectives.find(o => o.id === goal.org_objective_id);
+  const canEdit   = currentUser.id === goal.owner_id || currentUser.role === 'manager' || currentUser.role === 'admin';
+  const moodColor = m => ({ 'on-track': '#22c55e', 'at-risk': '#f59e0b', blocked: '#ef4444', ahead: '#4f7bff' }[m] || '#9ba3b8');
+
+  const addComment = async () => {
+    if (!comment.trim()) return;
+    try {
+      const c = await call('/comments', { method: 'POST', body: { goal_id: goal.id, text: comment } });
+      if (c) {
+        dispatch({ type: 'UPDATE_GOAL', goal: { ...goal, comments: [...(goal.comments || []), { ...c, user: currentUser }] } });
+        setComment('');
+        showToast('Comment added');
+      }
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const approveGoal = async () => {
+    try {
+      const updated = await call(`/goals/${goal.id}`, { method: 'PATCH', body: { status: 'active' } });
+      if (updated) { dispatch({ type: 'UPDATE_GOAL', goal: { ...goal, ...updated } }); showToast('Goal approved!'); onClose(); }
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const returnGoal = async () => {
+    const returnComment = window.prompt('Return reason (will be emailed to employee):');
+    if (returnComment === null) return;
+    try {
+      const updated = await call(`/goals/${goal.id}`, { method: 'PATCH', body: { status: 'draft', _returnComment: returnComment } });
+      if (updated) { dispatch({ type: 'UPDATE_GOAL', goal: { ...goal, ...updated } }); showToast('Goal returned for revision'); onClose(); }
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const submitForReview = async () => {
+    try {
+      const updated = await call(`/goals/${goal.id}`, { method: 'PATCH', body: { status: 'review' } });
+      if (updated) { dispatch({ type: 'UPDATE_GOAL', goal: { ...goal, ...updated } }); showToast('Goal submitted for review!'); onClose(); }
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  return (
+    <>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: 660 }}>
+        <div className="modal-header">
+          <div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+              <Badge cls={STATUS_META[goal.status]?.cls || 'badge-draft'}>{STATUS_META[goal.status]?.label}</Badge>
+              <Badge cls={PRIORITY_META[goal.priority]?.cls || 'badge-medium'}>{goal.priority} priority</Badge>
+              {goal.category && <span className="chip">{goal.category}</span>}
+            </div>
+            <h2 style={{ fontSize: '1.1rem' }}>{goal.title}</h2>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={onClose} style={{ padding: 6 }}>{Icon.close}</button>
+        </div>
+
+        {goal.description && <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 16 }}>{goal.description}</p>}
+
+        <div className="grid-2 mb-16" style={{ gap: 12 }}>
+          <div className="card-sm" style={{ background: 'var(--bg3)' }}>
+            <div className="text-xs text-muted mb-4">Progress</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 8 }}>
+              <span style={{ fontSize: 24, fontWeight: 700, color: progressColor(goal.progress) }}>{goal.progress}%</span>
+            </div>
+            <ProgressBar value={goal.progress}/>
+          </div>
+          <div className="card-sm" style={{ background: 'var(--bg3)' }}>
+            <div className="text-xs text-muted mb-4">Owner</div>
+            {owner && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Avatar user={owner} size={28}/><span style={{ fontWeight: 500 }}>{owner.name}</span></div>}
+            {owner && <div className="text-xs text-muted mt-8">{owner.dept}</div>}
+          </div>
+        </div>
+
+        <div className="grid-2 mb-16" style={{ gap: 12 }}>
+          <div><span className="text-xs text-muted">Quarter: </span><span className="chip">{goal.quarter}</span></div>
+          <div><span className="text-xs text-muted">Due: </span><span style={{ fontWeight: 500 }}>{formatDate(goal.due_date)}</span></div>
+          {linkedObj && <div style={{ gridColumn: '1/-1' }}><span className="text-xs text-muted">Aligned to: </span><span style={{ color: 'var(--accent)', fontSize: 13 }}>{linkedObj.title}</span></div>}
+        </div>
+
+        {/* Check-ins */}
+        {(goal.checkins || []).length > 0 && (
+          <>
+            <div className="divider"/>
+            <h3 style={{ marginBottom: 12, fontSize: 13, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text3)' }}>Check-in History</h3>
+            {goal.checkins.map((ci, i) => (
+              <div key={ci.id} style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: moodColor(ci.mood), marginTop: 3, flexShrink: 0 }}/>
+                  {i < goal.checkins.length - 1 && <div style={{ width: 2, flex: 1, background: 'var(--border)', marginTop: 4 }}/>}
+                </div>
+                <div style={{ flex: 1, paddingBottom: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{ci.progress}% — {(ci.mood || '').replace('-', ' ')}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text3)' }}>{formatDate(ci.date)}</span>
+                  </div>
+                  <div className="comment-bubble">{ci.note}</div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Comments */}
+        <div className="divider"/>
+        <h3 style={{ marginBottom: 12, fontSize: 13, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text3)' }}>Comments ({(goal.comments || []).length})</h3>
+        {(goal.comments || []).map(c => {
+          const u = users.find(x => x.id === c.user_id) || (currentUser.id === c.user_id ? currentUser : null);
+          return (
+            <div key={c.id} style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+              {u && <Avatar user={u} size={28}/>}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>{u?.name || 'Unknown'} <span style={{ color: 'var(--text3)', fontWeight: 400 }}>{formatDate(c.created_at)}</span></div>
+                <div className="comment-bubble">{c.text}</div>
+              </div>
+            </div>
+          );
+        })}
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <input value={comment} onChange={e => setComment(e.target.value)} placeholder="Add a comment…" onKeyDown={e => e.key === 'Enter' && addComment()} style={{ flex: 1 }}/>
+          <button className="btn btn-primary btn-sm" onClick={addComment}>Post</button>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {canEdit && goal.status === 'active'  && <button className="btn btn-ghost btn-sm" onClick={() => setShowCheckin(true)}>{Icon.checkins} Check-in</button>}
+          {canEdit && <button className="btn btn-ghost btn-sm" onClick={() => setShowEdit(true)}>{Icon.edit} Edit</button>}
+          {currentUser.id === goal.owner_id && goal.status === 'draft' && <button className="btn btn-primary btn-sm" onClick={submitForReview}>Submit for Review</button>}
+          {(currentUser.role === 'manager' || currentUser.role === 'admin') && goal.status === 'review' && (
+            <>
+              <button className="btn btn-danger btn-sm" onClick={returnGoal}>Return for Rework</button>
+              <button className="btn btn-success btn-sm" onClick={approveGoal}>Approve Goal ✓</button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+    {showCheckin && <CheckinModal goal={goal} onClose={() => setShowCheckin(false)}/>}
+    {showEdit    && <GoalModal existing={goal} onClose={() => setShowEdit(false)}/>}
+    </>
+  );
+}
+
+// ─── GOAL CARD ───────────────────────────────────────────────────────────────
+function GoalCard({ goal, onClick }) {
+  const { state } = useApp();
+  const owner = state.users.find(u => u.id === goal.owner_id);
+  return (
+    <div className="goal-card" onClick={() => onClick(goal)}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+        <div style={{ flex: 1 }}>
+          <div className="goal-title">{goal.title}</div>
+          {goal.description && <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{goal.description}</div>}
+        </div>
+        <Badge cls={PRIORITY_META[goal.priority]?.cls || 'badge-medium'} style={{ flexShrink: 0 }}>{goal.priority}</Badge>
+      </div>
+      <div className="goal-meta">
+        <Badge cls={STATUS_META[goal.status]?.cls || 'badge-draft'}>{STATUS_META[goal.status]?.label}</Badge>
+        {goal.category && <span className="chip">{goal.category}</span>}
+        {goal.quarter && <span className="chip">{goal.quarter}</span>}
+      </div>
+      <div className="goal-progress-row">
+        <span className="progress-pct">{goal.progress}%</span>
+        <div style={{ flex: 1 }}><ProgressBar value={goal.progress}/></div>
+        {owner && <Avatar user={owner} size={24}/>}
+      </div>
+      {goal.due_date && <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>Due {formatDate(goal.due_date)}</div>}
+    </div>
+  );
+}
+
+// ─── EMPLOYEE DASHBOARD ───────────────────────────────────────────────────────
+function EmployeeDashboard() {
+  const { state } = useApp();
+  const { currentUser, goals, orgObjectives } = state;
+  const [selected, setSelected] = useState(null);
+  const [showNew, setShowNew]   = useState(false);
+  const myGoals  = goals.filter(g => g.owner_id === currentUser.id);
+  const active   = myGoals.filter(g => g.status === 'active').length;
+  const completed= myGoals.filter(g => g.status === 'completed').length;
+  const inReview = myGoals.filter(g => g.status === 'review').length;
+  const avgProgress = myGoals.length ? Math.round(myGoals.reduce((a, g) => a + g.progress, 0) / myGoals.length) : 0;
+
+  return (
+    <div className="content">
+      <div className="page-header">
+        <h2>My Goals</h2>
+        <p className="text-muted text-sm" style={{ marginTop: 4 }}>Track, update and align your personal goals with org objectives.</p>
+      </div>
+      <div className="grid-4 mb-24">
+        {[
+          { label: 'Total Goals', value: myGoals.length, color: 'var(--accent)' },
+          { label: 'Active',      value: active,          color: 'var(--teal)' },
+          { label: 'In Review',   value: inReview,        color: 'var(--amber)' },
+          { label: 'Avg Progress',value: avgProgress + '%',color: progressColor(avgProgress) },
+        ].map(s => (
+          <div key={s.label} className="stat-card">
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-num" style={{ color: s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h3>All Goals</h3>
+        <button className="btn btn-primary btn-sm" onClick={() => setShowNew(true)}>{Icon.plus} New Goal</button>
+      </div>
+
+      {myGoals.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🎯</div>
+          <h3>No goals yet</h3>
+          <p className="text-muted text-sm" style={{ marginTop: 8 }}>Create your first goal to start tracking progress.</p>
+          <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowNew(true)}>Create First Goal</button>
+        </div>
+      ) : (
+        <div className="grid-2" style={{ gap: 16 }}>
+          {myGoals.map(g => <GoalCard key={g.id} goal={g} onClick={setSelected}/>)}
+        </div>
+      )}
+
+      <div className="divider" style={{ margin: '32px 0 24px' }}/>
+      <h3 style={{ marginBottom: 12 }}>Org Objectives</h3>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {orgObjectives.map(o => {
+          const linked = myGoals.filter(g => g.org_objective_id === o.id).length;
+          return (
+            <div key={o.id} className="card-sm" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--accent-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', flexShrink: 0 }}>{Icon.objective}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>{o.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{o.category} · {o.year}</div>
+              </div>
+              <Badge cls={linked > 0 ? 'badge-accent' : 'badge-draft'}>{linked} goal{linked !== 1 ? 's' : ''} linked</Badge>
+            </div>
+          );
+        })}
+      </div>
+
+      {selected  && <GoalDetail goal={selected} onClose={() => setSelected(null)}/>}
+      {showNew   && <GoalModal  onClose={() => setShowNew(false)}/>}
+    </div>
+  );
+}
+
+// ─── CHECK-INS PAGE ───────────────────────────────────────────────────────────
+function CheckinsPage() {
+  const { state } = useApp();
+  const { currentUser, goals } = state;
+  const [selected, setSelected]     = useState(null);
+  const [showCheckin, setShowCheckin] = useState(null);
+  const myGoals   = goals.filter(g => g.owner_id === currentUser.id && g.status === 'active');
+  const allCheckins = myGoals.flatMap(g => (g.checkins || []).map(ci => ({ ...ci, goalTitle: g.title, goalId: g.id })))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  const moodMeta  = { 'on-track': { label: 'On Track', color: '#22c55e' }, 'at-risk': { label: 'At Risk', color: '#f59e0b' }, blocked: { label: 'Blocked', color: '#ef4444' }, ahead: { label: 'Ahead', color: '#4f7bff' } };
+
+  return (
+    <div className="content">
+      <div className="page-header"><h2>Check-ins</h2><p className="text-muted text-sm" style={{ marginTop: 4 }}>Submit quarterly progress updates for your active goals.</p></div>
+      <h3 style={{ marginBottom: 12 }}>Active Goals — Submit Check-in</h3>
+      {myGoals.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: 40, color: 'var(--text2)' }}>No active goals to check in on.</div>
+      ) : (
+        <div style={{ display: 'grid', gap: 10, marginBottom: 32 }}>
+          {myGoals.map(g => (
+            <div key={g.id} className="card-sm" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 500 }}>{g.title}</div>
+                <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 13, color: progressColor(g.progress), fontWeight: 600 }}>{g.progress}%</span>
+                  <div style={{ flex: 1, maxWidth: 200 }}><ProgressBar value={g.progress}/></div>
+                  <span className="chip">{g.quarter}</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-ghost btn-sm" onClick={() => setSelected(goals.find(x => x.id === g.id))}>View</button>
+                <button className="btn btn-primary btn-sm" onClick={() => setShowCheckin(g)}>Check-in</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h3 style={{ marginBottom: 12 }}>Check-in History</h3>
+      {allCheckins.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: 40, color: 'var(--text2)' }}>No check-ins submitted yet.</div>
+      ) : (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <table className="table">
+            <thead><tr><th>Goal</th><th>Date</th><th>Progress</th><th>Status</th><th>Note</th></tr></thead>
+            <tbody>
+              {allCheckins.map(ci => (
+                <tr key={ci.id}>
+                  <td style={{ maxWidth: 200, fontWeight: 500, fontSize: 13 }}>{ci.goalTitle}</td>
+                  <td style={{ fontSize: 13, color: 'var(--text2)' }}>{formatDate(ci.date)}</td>
+                  <td><div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ fontSize: 13, fontWeight: 600, color: progressColor(ci.progress), minWidth: 32 }}>{ci.progress}%</span><div style={{ width: 80 }}><ProgressBar value={ci.progress}/></div></div></td>
+                  <td><span style={{ fontSize: 12, fontWeight: 500, color: moodMeta[ci.mood]?.color || 'var(--text2)' }}>{moodMeta[ci.mood]?.label || ci.mood}</span></td>
+                  <td style={{ fontSize: 13, color: 'var(--text2)', maxWidth: 280 }}>{ci.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {selected    && <GoalDetail goal={selected} onClose={() => setSelected(null)}/>}
+      {showCheckin && <CheckinModal goal={showCheckin} onClose={() => setShowCheckin(null)}/>}
+    </div>
+  );
+}
+
+// ─── MANAGER TEAM VIEW ────────────────────────────────────────────────────────
+function ManagerTeamView() {
+  const { state } = useApp();
+  const { currentUser, goals, users } = state;
+  const [selected, setSelected]       = useState(null);
+  const [showNew, setShowNew]         = useState(false);
+  const [filterUser, setFilterUser]   = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+
+  const allUsers = [currentUser, ...users.filter(u => u.id !== currentUser.id)];
+  const teamGoals = goals; // API already filtered to team for managers
+  const filtered  = teamGoals.filter(g =>
+    (filterUser === 'all' || g.owner_id === filterUser) &&
+    (filterStatus === 'all' || g.status === filterStatus)
+  );
+  const reviewGoals = teamGoals.filter(g => g.status === 'review');
+  const avgTeamProgress = teamGoals.length ? Math.round(teamGoals.reduce((a, g) => a + g.progress, 0) / teamGoals.length) : 0;
+
+  return (
+    <div className="content">
+      <div className="page-header"><h2>Team Overview</h2><p className="text-muted text-sm" style={{ marginTop: 4 }}>Monitor and manage your team's goals and progress.</p></div>
+      <div className="grid-4 mb-24">
+        {[
+          { label: 'Total Goals',    value: teamGoals.length,    color: 'var(--accent)' },
+          { label: 'Pending Review', value: reviewGoals.length,  color: 'var(--amber)'  },
+          { label: 'Completed',      value: teamGoals.filter(g => g.status === 'completed').length, color: 'var(--green)' },
+          { label: 'Team Avg',       value: avgTeamProgress + '%', color: progressColor(avgTeamProgress) },
+        ].map(s => <div key={s.label} className="stat-card"><div className="stat-label">{s.label}</div><div className="stat-num" style={{ color: s.color }}>{s.value}</div></div>)}
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        <select value={filterUser} onChange={e => setFilterUser(e.target.value)} style={{ width: 'auto', minWidth: 160 }}>
+          <option value="all">All Team Members</option>
+          {allUsers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: 'auto', minWidth: 140 }}>
+          <option value="all">All Statuses</option>
+          {Object.entries(STATUS_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+        </select>
+        <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setShowNew(true)}>{Icon.plus} Assign Goal</button>
+      </div>
+
+      {reviewGoals.length > 0 && (
+        <div style={{ background: 'var(--amber-bg)', border: '1px solid rgba(245,158,11,.3)', borderRadius: 'var(--radius-lg)', padding: '12px 16px', marginBottom: 20, display: 'flex', gap: 10, alignItems: 'center' }}>
+          {Icon.bell}<span style={{ color: 'var(--amber)', fontSize: 14, fontWeight: 500 }}>{reviewGoals.length} goal{reviewGoals.length !== 1 ? 's' : ''} awaiting your review</span>
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
+        <div className="empty-state"><div className="empty-icon">📋</div><h3>No goals found</h3></div>
+      ) : (
+        <div className="grid-2" style={{ gap: 16 }}>
+          {filtered.map(g => <GoalCard key={g.id} goal={g} onClick={setSelected}/>)}
+        </div>
+      )}
+
+      {selected && <GoalDetail goal={selected} onClose={() => setSelected(null)}/>}
+      {showNew  && <GoalModal  onClose={() => setShowNew(false)}/>}
+    </div>
+  );
+}
+
+// ─── ANALYTICS PAGE ───────────────────────────────────────────────────────────
+function AnalyticsPage() {
+  const { state } = useApp();
+  const { goals, users, currentUser } = state;
+  const relevantGoals = currentUser.role === 'employee' ? goals.filter(g => g.owner_id === currentUser.id) : goals;
+
+  const byStatus = Object.entries(STATUS_META).map(([k, v]) => ({ label: v.label, count: relevantGoals.filter(g => g.status === k).length, cls: v.cls }));
+  const byPriority = [
+    { label: 'High',   count: relevantGoals.filter(g => g.priority === 'high').length,   color: '#ef4444' },
+    { label: 'Medium', count: relevantGoals.filter(g => g.priority === 'medium').length, color: '#f59e0b' },
+    { label: 'Low',    count: relevantGoals.filter(g => g.priority === 'low').length,    color: '#22c55e' },
+  ];
+  const avgProgress = relevantGoals.length ? Math.round(relevantGoals.reduce((a, g) => a + g.progress, 0) / relevantGoals.length) : 0;
+
+  return (
+    <div className="content">
+      <div className="page-header"><h2>Analytics</h2><p className="text-muted text-sm" style={{ marginTop: 4 }}>Overview of goal progress and performance metrics.</p></div>
+      <div className="grid-3 mb-24">
+        <div className="stat-card"><div className="stat-label">Total Goals</div><div className="stat-num" style={{ color: 'var(--accent)' }}>{relevantGoals.length}</div></div>
+        <div className="stat-card"><div className="stat-label">Avg Progress</div><div className="stat-num" style={{ color: progressColor(avgProgress) }}>{avgProgress}%</div></div>
+        <div className="stat-card"><div className="stat-label">Completed</div><div className="stat-num" style={{ color: 'var(--green)' }}>{relevantGoals.filter(g => g.status === 'completed').length}</div></div>
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <h3 style={{ marginBottom: 16 }}>Goals by Status</h3>
+          {byStatus.map(s => (
+            <div key={s.label} style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <Badge cls={s.cls}>{s.label}</Badge>
+                <span style={{ fontWeight: 600 }}>{s.count}</span>
+              </div>
+              <ProgressBar value={relevantGoals.length ? (s.count / relevantGoals.length) * 100 : 0}/>
+            </div>
+          ))}
+        </div>
+        <div className="card">
+          <h3 style={{ marginBottom: 16 }}>Goals by Priority</h3>
+          {byPriority.map(p => (
+            <div key={p.label} style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: p.color }}>{p.label}</span>
+                <span style={{ fontWeight: 600 }}>{p.count}</span>
+              </div>
+              <ProgressBar value={relevantGoals.length ? (p.count / relevantGoals.length) * 100 : 0} color={p.color}/>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {(currentUser.role === 'manager' || currentUser.role === 'admin') && (
+        <div className="card" style={{ marginTop: 20 }}>
+          <h3 style={{ marginBottom: 16 }}>Team Member Progress</h3>
+          <table className="table">
+            <thead><tr><th>Member</th><th>Goals</th><th>Completed</th><th>Avg Progress</th></tr></thead>
+            <tbody>
+              {users.map(u => {
+                const ug = goals.filter(g => g.owner_id === u.id);
+                const up = ug.length ? Math.round(ug.reduce((a, g) => a + g.progress, 0) / ug.length) : 0;
+                return (
+                  <tr key={u.id}>
+                    <td><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Avatar user={u} size={26}/><span style={{ fontWeight: 500 }}>{u.name}</span></div></td>
+                    <td>{ug.length}</td>
+                    <td>{ug.filter(g => g.status === 'completed').length}</td>
+                    <td><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ width: 100 }}><ProgressBar value={up}/></div><span style={{ fontWeight: 600, fontSize: 13, color: progressColor(up) }}>{up}%</span></div></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GovernanceDeskScreen() {
+  const { api } = useApp();
+  const [matrix, setMatrix] = useState([]);
+  const [escalations, setEscalations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Dynamically pull both grids out of your backend routers parallelly
+    Promise.all([
+      api('/audit/governance/completion-grid'),
+      api('/audit/governance/escalations')
+    ]).then(([matrixRes, escalationRes]) => {
+      if (matrixRes) setMatrix(matrixRes);
+      if (escalationRes) setEscalations(escalationRes);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const downloadCSVReport = async () => {
+    const reportData = await api('/audit/governance/achievements');
+    if (!reportData) return;
+    let csvContent = "data:text/csv;charset=utf-8,Goal Title,Completion Progress (%),Status,Quarter\n";
+    reportData.forEach(g => {
+      csvContent += `"${(g.title || '').replace(/,/g, ' ')}",${g.progress || 0},"${g.status || 'Draft'}","${g.quarter || 'Q3 2025'}"\n`;
+    });
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", "GoalFlow_Corporate_Achievement_Report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (loading) return <div className="content"><p className="text-muted">Loading governance grid metrics…</p></div>;
+
+  return (
+    <div className="content fade-in">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2>Reporting & Corporate Governance</h2>
+          <p className="text-muted text-sm">Review real-time completion health tracking matrices and rule-based escalations.</p>
+        </div>
+        <button className="btn btn-primary" onClick={downloadCSVReport}>📥 Export Targets vs Achievements</button>
+      </div>
+
+      {/* ── 5.3 RULE-BASED ESCALATION LOG FEED FOR ADMIN/HR ── */}
+      <div className="card mb-24" style={{ borderColor: 'rgba(239,68,68,.3)', background: 'rgba(239,68,68,.02)', marginBottom: '24px' }}>
+        <h3 style={{ color: 'var(--red)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          ⚠️ Rule-Based Compliance Breach Escalation Log
+        </h3>
+        <p className="text-muted text-sm" style={{ marginBottom: '16px' }}>System automated tracking loop detecting missed milestone open windows and pending submission windows:</p>
+        <table className="table">
+          <thead>
+            <tr><th>Employee</th><th>Department</th><th>Triggered Breach Condition</th><th>Days Overdue</th><th>Escalation Tier State</th></tr>
+          </thead>
+          <tbody>
+            {escalations.length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text3)' }}>✔ No active rule breaches or overdue milestone delays recorded across the cycle.</td></tr>
+            ) : (
+              escalations.map((esc, i) => (
+                <tr key={i}>
+                  <td><strong>{esc.users?.name || 'Seeded User'}</strong></td>
+                  <td>{esc.users?.dept || 'Operations'}</td>
+                  <td style={{ color: 'var(--amber)' }}>{esc.breach_type}</td>
+                  <td><span className="badge badge-high">{esc.days_overdue} Days</span></td>
+                  <td><span className="badge badge-role" style={{ background: 'var(--red-bg)', color: 'var(--red)' }}>🔥 {esc.current_tier}</span></td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Standard Completion Dashboard Grid */}
+      <div className="card">
+        <h3 style={{ marginBottom: '16px' }}>Real-time Window Completion Grid</h3>
+        <table className="table">
+          <thead>
+            <tr><th>Employee Name</th><th>Department</th><th>Operational Role</th><th>Q3 Status</th><th>Last Interaction</th></tr>
+          </thead>
+          <tbody>
+            {matrix.map(row => (
+              <tr key={row.id}>
+                <td><strong>{row.name}</strong></td>
+                <td>{row.dept || 'General'}</td>
+                <td><span className="badge badge-role">{row.role}</span></td>
+                <td>
+                  <span className={`badge ${row.hasCompletedQ3 ? 'badge-completed' : 'badge-high'}`}>
+                    {row.hasCompletedQ3 ? '✓ Submitted' : 'Pending Action'}
+                  </span>
+                </td>
+                <td>{row.lastCheckIn ? new Date(row.lastCheckIn).toLocaleDateString('en-IN') : 'Never'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+
+
+// ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
+function AdminPanel() {
+  const { state, dispatch, showToast, api: call } = useApp();
+  const { goals, users, orgObjectives, auditLog } = state;
+  const [tab, setTab]       = useState('users');
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [showAddObj,  setShowAddObj]  = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'employee', dept: '' });
+  const [newObj,  setNewObj]  = useState({ title: '', category: '', year: 2025 });
+  const [auditData, setAuditData] = useState([]);
+  const [auditLoaded, setAuditLoaded] = useState(false);
+
+  // Load audit log when tab opens
+  useEffect(() => {
+    if (tab === 'audit' && !auditLoaded) {
+      call('/audit').then(data => { if (data) { setAuditData(data); setAuditLoaded(true); } });
+    }
+  }, [tab]);
+
+  const addUser = async () => {
+    if (!newUser.name || !newUser.email || !newUser.password) { showToast('Name, email and password are required', 'error'); return; }
+    try {
+      const user = await call('/users', { method: 'POST', body: newUser });
+      if (user) { dispatch({ type: 'ADD_USER', user }); showToast('User created!'); setShowAddUser(false); setNewUser({ name: '', email: '', password: '', role: 'employee', dept: '' }); }
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const addObjective = async () => {
+    if (!newObj.title.trim()) { showToast('Title required', 'error'); return; }
+    try {
+      const obj = await call('/objectives', { method: 'POST', body: newObj });
+      if (obj) { dispatch({ type: 'ADD_OBJECTIVE', objective: obj }); showToast('Objective added'); setShowAddObj(false); setNewObj({ title: '', category: '', year: 2025 }); }
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const revokeSession = async (userId, userName) => {
+    if (!confirm(`Force-logout ${userName}? Their current session will be invalidated.`)) return;
+    try {
+      await call(`/users/${userId}/revoke-session`, { method: 'POST' });
+      showToast(`Session revoked for ${userName}`);
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  return (
+    <div className="content">
+      <div className="page-header"><h2>Admin Panel</h2><p className="text-muted text-sm" style={{ marginTop: 4 }}>Manage users, org objectives, and system audit trail.</p></div>
+
+      <div className="tabs">
+        {['users', 'objectives', 'audit'].map(t => <button key={t} className={`tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>)}
+      </div>
+
+      {tab === 'users' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <button className="btn btn-primary btn-sm" onClick={() => setShowAddUser(true)}>{Icon.plus} Add User</button>
+          </div>
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <table className="table">
+              <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Dept</th><th>Goals</th><th>Session</th></tr></thead>
+              <tbody>
+                {users.map(u => {
+                  const ug = goals.filter(g => g.owner_id === u.id);
+                  return (
+                    <tr key={u.id}>
+                      <td><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Avatar user={u} size={28}/><span style={{ fontWeight: 500 }}>{u.name}</span></div></td>
+                      <td style={{ fontSize: 13, color: 'var(--text2)' }}>{u.email}</td>
+                      <td><Badge cls="badge-role">{u.role}</Badge></td>
+                      <td style={{ fontSize: 13 }}>{u.dept}</td>
+                      <td style={{ fontSize: 13 }}>{ug.length}</td>
+                      <td><button className="btn btn-danger btn-xs" onClick={() => revokeSession(u.id, u.name)} title="Force logout">Revoke</button></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {showAddUser && (
+            <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowAddUser(false)}>
+              <div className="modal" style={{ maxWidth: 440 }}>
+                <div className="modal-header"><h3>Add New User</h3><button className="btn btn-ghost btn-sm" onClick={() => setShowAddUser(false)} style={{ padding: 6 }}>{Icon.close}</button></div>
+                <div className="form-grid">
+                  <div className="form-row">
+                    <div><label>Full Name *</label><input value={newUser.name} onChange={e => setNewUser(n => ({ ...n, name: e.target.value }))} placeholder="Ananya Singh"/></div>
+                    <div><label>Department</label><input value={newUser.dept} onChange={e => setNewUser(n => ({ ...n, dept: e.target.value }))} placeholder="Engineering"/></div>
+                  </div>
+                  <div><label>Email *</label><input type="email" value={newUser.email} onChange={e => setNewUser(n => ({ ...n, email: e.target.value }))} placeholder="ananya@corp.com"/></div>
+                  <div><label>Password *</label><input type="password" value={newUser.password} onChange={e => setNewUser(n => ({ ...n, password: e.target.value }))} placeholder="Min 8 characters"/></div>
+                  <div><label>Role</label><select value={newUser.role} onChange={e => setNewUser(n => ({ ...n, role: e.target.value }))}><option value="employee">Employee</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+                  <button className="btn btn-ghost" onClick={() => setShowAddUser(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={addUser}>Create User</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {tab === 'objectives' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <button className="btn btn-primary btn-sm" onClick={() => setShowAddObj(true)}>{Icon.plus} Add Objective</button>
+          </div>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {orgObjectives.map(o => {
+              const linked = goals.filter(g => g.org_objective_id === o.id);
+              const avgP   = linked.length ? Math.round(linked.reduce((a, g) => a + g.progress, 0) / linked.length) : 0;
+              return (
+                <div key={o.id} className="card-sm" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', flexShrink: 0 }}>{Icon.objective}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, marginBottom: 2 }}>{o.title}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text3)' }}>{o.category} · {o.year}</div>
+                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ flex: 1, maxWidth: 200 }}><ProgressBar value={avgP}/></div>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: progressColor(avgP) }}>{avgP}% avg</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>{linked.length}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text3)' }}>goals linked</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {showAddObj && (
+            <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowAddObj(false)}>
+              <div className="modal" style={{ maxWidth: 440 }}>
+                <div className="modal-header"><h3>New Org Objective</h3><button className="btn btn-ghost btn-sm" onClick={() => setShowAddObj(false)} style={{ padding: 6 }}>{Icon.close}</button></div>
+                <div className="form-grid">
+                  <div><label>Title *</label><input value={newObj.title} onChange={e => setNewObj(n => ({ ...n, title: e.target.value }))} placeholder="Org-level objective…"/></div>
+                  <div><label>Category</label><input value={newObj.category} onChange={e => setNewObj(n => ({ ...n, category: e.target.value }))} placeholder="Business Growth, Efficiency…"/></div>
+                  <div><label>Year</label><select value={newObj.year} onChange={e => setNewObj(n => ({ ...n, year: e.target.value }))}><option>2025</option><option>2026</option></select></div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+                  <button className="btn btn-ghost" onClick={() => setShowAddObj(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={addObjective}>Add Objective</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {tab === 'audit' && (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <table className="table">
+            <thead><tr><th>User</th><th>Action</th><th>Entity</th><th>Timestamp</th></tr></thead>
+            <tbody>
+              {auditData.length === 0 ? (
+                <tr><td colSpan={4} style={{ textAlign: 'center', padding: 40, color: 'var(--text2)' }}>{auditLoaded ? 'No audit records yet.' : 'Loading…'}</td></tr>
+              ) : auditData.map(a => {
+                const typeColor = { CREATE: 'var(--teal)', UPDATE: 'var(--amber)', DELETE: 'var(--red)', APPROVE: 'var(--green)', LOGIN: 'var(--accent)', LOGOUT: 'var(--text3)', CHECKIN: 'var(--purple)' }[a.action] || 'var(--text2)';
+                return (
+                  <tr key={a.id}>
+                    <td style={{ fontWeight: 500, fontSize: 13 }}>{a.users?.name || '—'}</td>
+                    <td><span style={{ fontSize: 12, fontWeight: 600, color: typeColor }}>{a.action}</span> <span style={{ fontSize: 12, color: 'var(--text2)' }}>{a.entity}</span></td>
+                    <td style={{ fontSize: 12, color: 'var(--text3)', maxWidth: 200 }}>{JSON.stringify(a.changes).slice(0, 60)}</td>
+                    <td style={{ fontSize: 12, color: 'var(--text3)', whiteSpace: 'nowrap' }}>{formatDate(a.created_at)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+function Sidebar({ sidebarOpen }) {
+  const { state, dispatch, api: call } = useApp();
+  const { currentUser, currentPage } = state;
+  const set = page => dispatch({ type: 'SET_PAGE', page });
+
+  const navByRole = {
+    employee: [
+      { id: 'dashboard', label: 'Dashboard',  icon: Icon.dashboard },
+      { id: 'goals',     label: 'My Goals',   icon: Icon.goals     },
+      { id: 'checkins',  label: 'Check-ins',  icon: Icon.checkins  },
+      { id: 'analytics', label: 'Analytics',  icon: Icon.analytics },
+    ],
+    manager: [
+      { id: 'dashboard', label: 'Dashboard',  icon: Icon.dashboard },
+      { id: 'team',      label: 'Team Goals', icon: Icon.team      },
+      { id: 'goals',     label: 'My Goals',   icon: Icon.goals     },
+      { id: 'checkins',  label: 'Check-ins',  icon: Icon.checkins  },
+      { id: 'analytics', label: 'Analytics',  icon: Icon.analytics },
+    ],
+    admin: [
+      { id: 'dashboard', label: 'Dashboard',  icon: Icon.dashboard },
+      { id: 'team',      label: 'All Goals',  icon: Icon.goals     },
+      { id: 'analytics', label: 'Analytics',  icon: Icon.analytics },
+      { id: 'admin',     label: 'Admin Panel',icon: Icon.admin     },
+      { id: 'governance', label: 'Governance Desk', icon: Icon.admin }
+    ],
+  };
+
+  const nav = navByRole[currentUser.role] || navByRole.employee;
+
+  const logout = async () => {
+    try { await call('/auth/logout', { method: 'POST' }); } catch {}
+    localStorage.removeItem('gf_token');
+    dispatch({ type: 'LOGOUT' });
+  };
+
+  return (
+    <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+      <div className="sidebar-logo">
+        <div className="logo-text"><span className="logo-dot"/>GoalFlow</div>
+        <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 4, marginLeft: 16 }}>Performance Portal</div>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', paddingTop: 8 }}>
+        <div className="sidebar-section">Navigation</div>
+        {nav.map(n => (
+          <div key={n.id} className={`nav-item ${currentPage === n.id ? 'active' : ''}`} onClick={() => set(n.id)}>
+            {n.icon}{n.label}
+          </div>
+        ))}
+      </div>
+      <div className="sidebar-user">
+        <Avatar user={currentUser} size={34}/>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 500, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser.name}</div>
+          <Badge cls="badge-role" style={{ marginTop: 2 }}>{currentUser.role}</Badge>
+        </div>
+        <button className="btn btn-ghost btn-sm" style={{ padding: 6, flexShrink: 0 }} onClick={logout} title="Log out">{Icon.logout}</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── TOPBAR ───────────────────────────────────────────────────────────────────
+function Topbar({ onMenuClick }) {
+  const { state } = useApp();
+  const { currentUser, currentPage, goals } = state;
+  const pendingReview = goals.filter(g => g.status === 'review').length;
+  const titles = { dashboard: 'Dashboard', goals: 'My Goals', checkins: 'Check-ins', team: 'Team Overview', analytics: 'Analytics', admin: 'Admin Panel' };
+
+  return (
+    <div className="topbar">
+      <button className="btn btn-ghost btn-sm" style={{ padding: 6, display: 'none' }} id="menu-btn" onClick={onMenuClick}>{Icon.menu}</button>
+      <div style={{ flex: 1 }}><h2 style={{ fontSize: '1rem', fontWeight: 600 }}>{titles[currentPage] || 'Dashboard'}</h2></div>
+      {(currentUser.role === 'manager' || currentUser.role === 'admin') && pendingReview > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--amber)' }}>
+          {Icon.bell}<span>{pendingReview} pending review</span>
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Avatar user={currentUser} size={30}/>
+        <span style={{ fontSize: 13, fontWeight: 500 }}>{currentUser.name}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── LOADING SCREEN ───────────────────────────────────────────────────────────
+function LoadingScreen() {
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 32 }}>🎯</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text2)', fontSize: 14 }}>
+        <span className="spinner" style={{ borderTopColor: 'var(--accent)', borderColor: 'rgba(79,123,255,.3)' }}/> Loading GoalFlow…
+      </div>
+    </div>
+  );
+}
+
+// ─── APP SHELL ────────────────────────────────────────────────────────────────
+function AppShell() {
+  const { state } = useApp();
+  const { currentUser, currentPage, loading } = state;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useData(); // loads all data after login
+
+  if (loading) return <LoadingScreen/>;
+  if (!currentUser) return <Login/>;
+
+  const pages = {
+    dashboard: currentUser.role === 'employee' ? <EmployeeDashboard/> : currentUser.role === 'manager' ? <ManagerTeamView/> : <AnalyticsPage/>,
+    goals:     <EmployeeDashboard/>,
+    checkins:  <CheckinsPage/>,
+    team:      <ManagerTeamView/>,
+    analytics: <AnalyticsPage/>,
+    admin:     <AdminPanel/>,
+
+    governance: <GovernanceDeskScreen />
+  };
+
+  return (
+    <div className="app">
+      <Sidebar sidebarOpen={sidebarOpen}/>
+      {sidebarOpen && <div style={{ position: 'fixed', inset: 0, zIndex: 99, background: 'rgba(0,0,0,.5)' }} onClick={() => setSidebarOpen(false)}/>}
+      <div className="main">
+        <Topbar onMenuClick={() => setSidebarOpen(o => !o)}/>
+        <div className="fade-in">{pages[currentPage] || pages.dashboard}</div>
+      </div>
+      <Toast/>
+    </div>
+  );
+}
+
+// ─── ROOT ─────────────────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <AppProvider><AppShell/></AppProvider>
+);
+</script>
+<style>
+@media(max-width:900px){#menu-btn{display:flex!important}}
+</style>
+</body>
+</html>
